@@ -1,0 +1,4 @@
+node_modules/
+remotion-template/src/shaders.gen.ts
+remotion-template/out/
+*.mp4

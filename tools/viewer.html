@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>shaders, vol. 2 — viewer</title>
+<style>
+  body { margin: 0; background: #000; color: #ccc; font: 13px system-ui, sans-serif; display: grid; place-items: center; min-height: 100vh; }
+  canvas { height: 90vh; aspect-ratio: 9 / 16; display: block; }
+  nav { position: fixed; top: 8px; left: 8px; display: flex; gap: 8px; }
+  nav a { color: #ccc; }
+  #err { color: #f66; white-space: pre-wrap; position: fixed; bottom: 8px; left: 8px; }
+</style>
+</head>
+<body>
+<!-- Minimal Shadertoy-like viewer for local testing.
+     Serve the repo root over HTTP, then open tools/viewer.html?s=gyroid
+     ?mode=glsl tests the standalone WebGL1 file instead of the Shadertoy one. -->
+<nav id="nav"></nav>
+<canvas id="c" width="540" height="960"></canvas>
+<div id="err"></div>
+<script>
+const PIECES = ["gyroid", "ink", "breath", "veil", "echo"];
+const q = new URLSearchParams(location.search);
+const id = q.get("s") || "gyroid";
+const mode = q.get("mode") === "glsl" ? "glsl" : "shadertoy";
+document.getElementById("nav").innerHTML = PIECES.map((p) => `<a href="?s=${p}&mode=${mode}">${p}</a>`).join("") +
+  ` · <a href="?s=${id}&mode=${mode === "glsl" ? "shadertoy" : "glsl"}">${mode === "glsl" ? "shadertoy" : "glsl"} mode</a>`;
+
+const canvas = document.getElementById("c");
+const gl = canvas.getContext(mode === "glsl" ? "webgl" : "webgl2", { preserveDrawingBuffer: true });
+
+// Same wrapper shape Shadertoy uses around the Image tab
+const wrapToy = (src) => `#version 300 es
+precision highp float;
+uniform vec3 iResolution;
+uniform float iTime;
+out vec4 shadertoyOut;
+${src}
+void main() { mainImage(shadertoyOut, gl_FragCoord.xy); shadertoyOut.a = 1.0; }`;
+
+function compile(type, src) {
+  const s = gl.createShader(type);
+  gl.shaderSource(s, src);
+  gl.compileShader(s);
+  if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s));
+  return s;
+}
+
+async function start() {
+  const src = await (await fetch(`../${mode}/${id}.glsl`)).text();
+  const vs = mode === "glsl"
+    ? "attribute vec2 a;void main(){gl_Position=vec4(a,0.,1.);}"
+    : "#version 300 es\nin vec2 a;void main(){gl_Position=vec4(a,0.,1.);}";
+  const prog = gl.createProgram();
+  gl.attachShader(prog, compile(gl.VERTEX_SHADER, vs));
+  gl.attachShader(prog, compile(gl.FRAGMENT_SHADER, mode === "glsl" ? src : wrapToy(src)));
+  gl.linkProgram(prog);
+  if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(prog));
+  gl.useProgram(prog);
+  gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
+  gl.enableVertexAttribArray(0);
+  gl.bindAttribLocation(prog, 0, "a");
+  gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
+  const u = (n) => gl.getUniformLocation(prog, n);
+  const duration = Number((src.match(/DURATION = ([\d.]+)/) || [])[1]) || null;
+
+  // Draw at a given time in seconds (glsl mode takes the phase from the same clock)
+  const draw = (t) => {
+    gl.viewport(0, 0, canvas.width, canvas.height);
+    if (mode === "glsl") {
+      gl.uniform2f(u("uRes"), canvas.width, canvas.height);
+      gl.uniform1f(u("uPhase"), q.get("phase") ? Number(q.get("phase")) : (t / 10) % 1);
+    } else {
+      gl.uniform3f(u("iResolution"), canvas.width, canvas.height, 1);
+      gl.uniform1f(u("iTime"), t);
+    }
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+  };
+  const pixels = () => { const b = new Uint8Array(canvas.width * canvas.height * 4); gl.readPixels(0, 0, canvas.width, canvas.height, gl.RGBA, gl.UNSIGNED_BYTE, b); return b; };
+
+  // Test hook: max channel difference between iTime = a and iTime = b, plus mean brightness at a
+  window.compare = (a, b) => {
+    draw(a); const pa = pixels(); draw(b); const pb = pixels();
+    let max = 0, sum = 0;
+    for (let i = 0; i < pa.length; i++) { max = Math.max(max, Math.abs(pa[i] - pb[i])); if (i % 4 !== 3) sum += pa[i]; }
+    return { max, mean: sum / (pa.length * 0.75), duration };
+  };
+
+  const fixed = q.get("t");
+  const t0 = performance.now();
+  const loop = () => { draw(fixed !== null ? Number(fixed) : (performance.now() - t0) / 1000); if (fixed === null) requestAnimationFrame(loop); };
+  loop();
+  window.ready = true;
+}
+start().catch((e) => { document.getElementById("err").textContent = e.message; window.ready = "error: " + e.message; });
+</script>
+</body>
+</html>

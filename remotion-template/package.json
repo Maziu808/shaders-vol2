@@ -1,0 +1,19 @@
+{
+  "name": "shaders-vol2-remotion",
+  "private": true,
+  "scripts": {
+    "gen": "node gen-shaders.mjs",
+    "dev": "npm run gen && remotion studio",
+    "render": "npm run gen && remotion render ShaderLoop out/loop.mp4"
+  },
+  "dependencies": {
+    "@remotion/cli": "4.0.484",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "remotion": "4.0.484"
+  },
+  "devDependencies": {
+    "@types/react": "19.2.7",
+    "typescript": "5.9.3"
+  }
+}

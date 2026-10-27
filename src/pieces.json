@@ -1,0 +1,7 @@
+[
+  { "id": "gyroid", "seconds": 9,  "frames": 270, "palette": "Jade",              "mid": [0.05, 0.16, 0.12], "high": [0.62, 0.86, 0.66] },
+  { "id": "ink",    "seconds": 10, "frames": 300, "palette": "Monochrome",        "mid": [0.15, 0.15, 0.14], "high": [0.95, 0.94, 0.90] },
+  { "id": "breath", "seconds": 8,  "frames": 240, "palette": "Magenta lava",      "mid": [0.30, 0.00, 0.10], "high": [1.00, 0.50, 0.30] },
+  { "id": "veil",   "seconds": 10, "frames": 300, "palette": "Green-pink aurora", "mid": [0.04, 0.30, 0.16], "high": [0.98, 0.62, 0.70] },
+  { "id": "echo",   "seconds": 12, "frames": 360, "palette": "Glacier",           "mid": [0.03, 0.08, 0.22], "high": [0.70, 0.85, 1.00] }
+]
