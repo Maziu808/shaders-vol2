@@ -1,0 +1,30 @@
+{
+  "name": "sun-remotion",
+  "version": "1.0.0",
+  "description": "The sun loop by @formatt_studio: a Remotion + three.js scene",
+  "license": "MIT",
+  "private": true,
+  "dependencies": {
+    "@react-three/postprocessing": "^3.0.4",
+    "@remotion/cli": "4.0.482",
+    "@remotion/tailwind-v4": "4.0.482",
+    "@remotion/three": "^4.0.482",
+    "@types/three": "^0.184.1",
+    "postprocessing": "^6.39.1",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "remotion": "4.0.482",
+    "tailwindcss": "4.0.0",
+    "three": "^0.184.0"
+  },
+  "devDependencies": {
+    "@types/react": "19.2.7",
+    "typescript": "5.9.3"
+  },
+  "scripts": {
+    "dev": "remotion studio",
+    "still": "remotion still SunLoop out/sun.png --frame=150",
+    "render": "remotion render SunLoop out/sun.mp4 --concurrency=1",
+    "lint": "tsc"
+  }
+}

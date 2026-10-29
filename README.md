@@ -16,6 +16,10 @@ Every piece loops **exactly**: time only enters as `θ = TAU · uPhase`, with `u
 
 Each one ships with its own colour palette (Jade, Monochrome, Magenta lava, Green-pink aurora, Glacier). All were designed for portrait 1080×1920 at 30 fps.
 
+### Bonus: the sun
+
+`sun-remotion/` holds the sun from the story series. It is a full Remotion + three.js scene (several shader layers plus post-processing), not a single-pass shader, so it has no Shadertoy version. See [`sun-remotion/README.md`](sun-remotion/README.md).
+
 <!-- Shadertoy links go here once published -->
 
 ## What's inside
@@ -23,6 +27,7 @@ Each one ships with its own colour palette (Jade, Monochrome, Magenta lava, Gree
 ```
 glsl/               standalone WebGL1 fragment shaders, palette included: copy and use
 shadertoy/          the same shaders adapted for Shadertoy (mainImage, iTime, iResolution)
+sun-remotion/       the sun loop: a Remotion + three.js scene (not a single-pass shader)
 remotion-template/  minimal Remotion project to render the loops as video
 src/                sources: common.glsl (shared header) + one file per piece
 tools/              build script and a tiny local viewer
